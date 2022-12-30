@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 import './filter.dart';
 import './restaurant.dart';
@@ -20,34 +21,86 @@ import './review.dart';
 
 // This is the file that Codelab users will primarily work on.
 
-Future<void> addRestaurant(Restaurant restaurant) {
+Future<void> addRestaurant(Restaurant restaurant) async {
   // TODO: Complete the "Add restaurants to Firestore" step.
-  return Future.value();
+  final restaurants = FirebaseFirestore.instance.collection('restaurants');
+  return restaurants.add({
+    'avgRating': restaurant.avgRating,
+    'category': restaurant.category,
+    'city': restaurant.city,
+    'name': restaurant.name,
+    'numRatings': restaurant.numRatings,
+    'photo': restaurant.photo,
+    'price': restaurant.price,
+  });
 }
 
 Stream<QuerySnapshot> loadAllRestaurants() {
   // TODO: Complete the "Display data from Cloud Firestore" step.
-  return Stream<QuerySnapshot>.value(null);
+  return FirebaseFirestore.instance
+      .collection('restaurants')
+      .orderBy('avgRating', descending: true)
+      .limit(50)
+      .snapshots();
 }
 
 List<Restaurant> getRestaurantsFromQuery(QuerySnapshot snapshot) {
   // TODO: Complete the "Display data from Cloud Firestore" step.
-  return [];
+  return snapshot.docs
+      .map((DocumentSnapshot doc) => Restaurant.fromSnapshot(doc))
+      .toList();
 }
 
 Future<Restaurant> getRestaurant(String restaurantId) {
   // TODO: Complete the "Get data" step.
-  return Future.value(null);
+  return FirebaseFirestore.instance
+      .collection('restaurants')
+      .doc(restaurantId)
+      .get()
+      .then((DocumentSnapshot doc) => Restaurant.fromSnapshot(doc));
 }
 
 Future<void> addReview({String restaurantId, Review review}) {
-  // TODO: Complete the "Write data in a transaction" step.
-  return Future.value();
+  final restaurant =
+      FirebaseFirestore.instance.collection('restaurants').doc(restaurantId);
+  final newReview = restaurant.collection('ratings').doc();
+  return FirebaseFirestore.instance.runTransaction((transaction) {
+    return transaction
+        .get(restaurant)
+        .then((DocumentSnapshot doc) => Restaurant.fromSnapshot(doc))
+        .then((Restaurant fresh) {
+      final newRatings = fresh.numRatings + 1;
+      final newAverage =
+          ((fresh.numRatings * fresh.avgRating) + review.rating) / newRatings;
+      transaction.update(
+          restaurant, {'numRatings': newRatings, 'avgRating': newAverage});
+
+      return transaction.set(newReview, {
+        'rating': review.rating,
+        'text': review.text,
+        'userName': review.userName,
+        'timestamp': review.timestamp ?? FieldValue.serverTimestamp(),
+        'userId': review.userId,
+      });
+    });
+  });
 }
 
 Stream<QuerySnapshot> loadFilteredRestaurants(Filter filter) {
-  // TODO: Complete the "Sorting and filtering data" step.
-  return Stream<QuerySnapshot>.value(null);
+  Query collection = FirebaseFirestore.instance.collection('restaurants');
+  if (filter.category != null) {
+    collection = collection.where('category', isEqualTo: filter.category);
+  }
+  if (filter.city != null) {
+    collection = collection.where('city', isEqualTo: filter.city);
+  }
+  if (filter.price != null) {
+    collection = collection.where('price', isEqualTo: filter.price);
+  }
+  return collection
+      .orderBy(filter.sort ?? 'avgRating', descending: true)
+      .limit(50)
+      .snapshots();
 }
 
 void addRestaurantsBatch(List<Restaurant> restaurants) {

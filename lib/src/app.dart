@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import 'home_page.dart';
@@ -22,6 +23,7 @@ class FriendlyEatsApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'FriendlyEats',
+      //home: TextButton(child: Text('Essai'), onPressed: (() {})),
       onGenerateRoute: (settings) {
         switch (settings.name) {
           case RestaurantPage.route:
@@ -33,9 +35,9 @@ class FriendlyEatsApp extends StatelessWidget {
             break;
           default:
             // return MaterialPageRoute(
-            //     builder: (context) => RestaurantPage(
-            //           restaurantId: 'lV81npEeboEActMpUJjn',
-            //         ));
+            //   builder: (context) => RestaurantPage(
+            //       restaurantId: 'lV81npEeboEActMpUJjn',
+            //   ));
             // Everything defaults to home, but maybe we want a custom 404 here
             return MaterialPageRoute(builder: (context) => HomePage());
         }

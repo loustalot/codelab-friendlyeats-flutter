@@ -188,11 +188,11 @@ class _FilterSelectDialogState extends State<FilterSelectDialog> {
         ),
       ),
       actions: [
-        FlatButton(
+        TextButton(
           child: Text('CLEAR ALL'),
           onPressed: () => Navigator.pop(context, Filter()),
         ),
-        RaisedButton(
+        ElevatedButton(
           child: Text('ACCEPT'),
           onPressed: () => Navigator.pop(
               context,

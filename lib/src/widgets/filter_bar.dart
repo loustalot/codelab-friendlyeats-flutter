@@ -75,9 +75,11 @@ class FilterBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FlatButton(
-      color: Colors.white,
-      padding: EdgeInsets.all(6),
+    return TextButton(
+      style: TextButton.styleFrom(
+          backgroundColor: Colors.white, padding: EdgeInsets.all(16)),
+      // color: Colors.white,
+      //  padding: EdgeInsets.all(6),
       onPressed: _onPressed,
       child: Row(
         children: [
